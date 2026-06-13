@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <AssemblyName>ShopPortraitOverhaul</AssemblyName>
+    <RootNamespace>ShopPortraitOverhaul</RootNamespace>
+    <GamePath>C:\Users\dakot\Documents\Applications\Steam\steamapps\common\Stardew Valley</GamePath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Pathoschild.Stardew.ModBuildConfig" Version="4.*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Reference SMAPI's bundled Harmony. Private=False means it is NOT copied into the mod folder. -->
+    <Reference Include="0Harmony">
+      <HintPath>$(GamePath)\smapi-internal\0Harmony.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,340 @@
+Shop Portrait Overhaul - Pack Author Guide
+==========================================
+
+This guide covers everything you need to know to create a portrait pack compatible
+with Shop Portrait Overhaul (SPO). No C# knowledge required - portrait packs are
+Content Patcher content packs.
+
+
+REQUIREMENTS
+------------
+- SMAPI (latest)
+- Content Patcher (latest)
+- Shop Portrait Overhaul (latest)
+
+
+FOLDER STRUCTURE
+----------------
+Your mod folder should look like this:
+
+    Mods/
+        [SPO] YourPackName/
+            manifest.json
+            content.json
+            assets/
+                shops/
+                    SeedShop_ShopPortrait.png
+                    Carpenter_ShopPortrait.png
+                    (etc.)
+
+The file names inside assets/shops/ are your choice - just make sure they match
+what you put in content.json.
+
+
+PORTRAIT IMAGE SPECS
+--------------------
+- Format: PNG
+- Recommended size: 512x512 or larger
+- Background: Transparent or opaque, your choice
+- Style: Any - the portrait displays in the bottom-left area of the screen when
+  the player opens a shop
+- Scaling: Portraits scale relative to the player's viewport height. The player
+  can adjust the scale further using the scale options in GMCM
+
+
+MANIFEST.JSON
+-------------
+
+{
+    "Name": "Your Pack Name",
+    "Author": "YourName",
+    "Version": "1.0.0",
+    "Description": "A short description of your portrait pack.",
+    "UniqueID": "YourName.YourPackName",
+    "ContentPackFor": {
+        "UniqueID": "Pathoschild.ContentPatcher"
+    },
+    "Dependencies": [
+        {
+            "UniqueID": "Dakota.ShopPortraitOverhaul",
+            "IsRequired": true
+        }
+    ]
+}
+
+Important: Your UniqueID must be unique. Use the format YourName.YourPackName.
+This ID is used throughout your content.json so keep it consistent.
+
+
+CONTENT.JSON
+------------
+Your content.json does two things for each shop you support:
+
+1. Registers your pack with SPO so it appears in the GMCM dropdown menu
+2. Loads your portrait image into the game
+
+The Portraits field is a dictionary where each key is a ShopId. Set a shop to
+null to use the player's global SPO settings, or provide a settings object to
+define per-shop defaults for your pack.
+
+{
+    "Format": "2.0.0",
+    "Changes": [
+        {
+            "Action": "EditData",
+            "Target": "{{Dakota.ShopPortraitOverhaul/Packs}}",
+            "Entries": {
+                "YourName.YourPackName": {
+                    "PackName": "Your Pack Display Name",
+                    "Author": "YourName",
+                    "Portraits": {
+                        "SeedShop": null,
+                        "Carpenter": null,
+                        "Blacksmith": null
+                    }
+                }
+            }
+        },
+        {
+            "Action": "Load",
+            "Target": "Custom/YourName.YourPackName/ShopPortraits/SeedShop",
+            "FromFile": "assets/shops/SeedShop_ShopPortrait.png"
+        },
+        {
+            "Action": "Load",
+            "Target": "Custom/YourName.YourPackName/ShopPortraits/Carpenter",
+            "FromFile": "assets/shops/Carpenter_ShopPortrait.png"
+        },
+        {
+            "Action": "Load",
+            "Target": "Custom/YourName.YourPackName/ShopPortraits/Blacksmith",
+            "FromFile": "assets/shops/Blacksmith_ShopPortrait.png"
+        }
+    ]
+}
+
+Key Rules:
+- The key in Entries ("YourName.YourPackName") must exactly match your UniqueID
+  in manifest.json
+- Every shop listed in Portraits must have a corresponding Load entry
+- The Target path for each Load must follow this exact format:
+  Custom/YourUniqueID/ShopPortraits/ShopId
+- ShopId values are case sensitive - see the full shop list at the bottom of
+  this guide
+
+
+PER-SHOP DEFAULT SETTINGS
+--------------------------
+You can define default portrait positioning and scale for individual shops in
+your pack. This lets you fine-tune how your portraits look out of the box without
+the player needing to adjust anything.
+
+Set a shop to null to use the player's global SPO settings, or provide a
+settings object with any of these optional fields:
+
+    DefaultScale    - Portrait size as a percentage (50, 75, 100, 125, or 150)
+    DefaultOffsetX  - Horizontal position nudge in pixels (can be negative)
+    DefaultOffsetY  - Vertical position nudge in pixels (can be negative)
+
+Example with mixed settings:
+
+    "Portraits": {
+        "SeedShop": null,
+        "Carpenter": {
+            "DefaultScale": 125,
+            "DefaultOffsetX": 20,
+            "DefaultOffsetY": 0
+        },
+        "FishShop": {
+            "DefaultScale": 100,
+            "DefaultOffsetX": -15,
+            "DefaultOffsetY": -50
+        }
+    }
+
+Pack defaults are used as the base. The player's global GMCM offset settings
+stack on top as a fine-tune nudge. If a shop has no settings defined (null),
+the player's global settings are used entirely.
+
+
+AUTHOR EXPORT TOOL
+------------------
+SPO includes a built-in export tool to help you find the right settings for each
+shop without manually editing JSON files.
+
+Workflow:
+1. Install your pack and launch the game
+2. Open a shop you want to tune
+3. Adjust the global scale and offset settings in GMCM until the portrait looks
+   right for that shop
+4. Open the SMAPI console window and type: spo_export
+5. SPO writes a file called SPO_AuthorExport.json to the SPO mod folder
+6. Open that file, find the shop entry, and copy the settings into your
+   content.json Portraits dictionary
+7. Repeat for each shop you want to fine-tune
+
+The exported file is formatted and ready to paste directly into your content.json.
+Only shops with a non-Vanilla active pack are included in the export.
+
+
+PARTIAL PACKS
+-------------
+You do not need to cover every shop. If your pack only includes portraits for a
+handful of shops, just list those shops in Portraits and provide Load entries for
+them. Players can mix and match packs - for example using your pack for NPC shops
+and a different pack for festival shops.
+
+
+MULTIPLE PACKS INSTALLED
+------------------------
+SPO handles multiple packs gracefully. If more than one pack covers the same shop,
+the player can choose which pack to use for that shop individually in the GMCM
+settings menu. Packs never conflict with each other.
+
+Default behavior:
+- 1 pack installed: that pack is used by default for all shops it covers
+- 2+ packs installed: the first pack alphabetically by UniqueID is used as the
+  default. Players can change their preference per shop in GMCM
+
+
+GMCM INTEGRATION
+----------------
+Once your pack is installed, SPO automatically adds it to the in-game settings
+menu (requires Generic Mod Config Menu). Players can:
+
+- Use the "Set All" dropdown at the top to apply your pack to all shops at once
+- Override individual shops using the per-shop dropdowns below
+- Adjust portrait scale (50% / 75% / 100% / 125% / 150%)
+- Adjust horizontal and vertical position offset
+
+You do not need to do anything extra to support GMCM - it is handled entirely
+by the framework.
+
+
+TESTING YOUR PACK
+-----------------
+1. Install your pack in the Mods folder
+2. Launch the game and load a save
+3. Open any shop you have a portrait for - your portrait should appear on the
+   left side of the screen
+4. Open the in-game options menu (requires GMCM) and verify your pack appears
+   in the dropdowns
+5. Check the SMAPI console for any errors related to your pack
+
+Common issues:
+- Portrait not showing: check that your Load target path exactly matches
+  Custom/YourUniqueID/ShopPortraits/ShopId
+- Pack not appearing in GMCM: check that your Entries key matches your
+  UniqueID exactly
+- Wrong portrait showing: verify the ShopId in your Portraits list matches
+  the shop list below (case sensitive)
+
+
+FULL SHOP ID REFERENCE
+======================
+Use these IDs exactly as written in your Portraits dictionary and Load targets.
+
+
+NPC Shops
+---------
+SeedShop                - Pierre's General Store
+Carpenter               - Robin's Carpenter Shop
+AdventureShop           - Marlon's Adventure Guild Shop
+AdventureGuildRecovery  - Marlon's Item Recovery
+Blacksmith              - Clint's Blacksmith Shop
+ClintUpgrade            - Clint's Tool Upgrade
+Saloon                  - Gus's Saloon
+ResortBar               - Gus's Resort Bar (Ginger Island)
+AnimalShop              - Marnie's Animal Shop
+PetAdoption             - Marnie's Pet Adoption
+FishShop                - Willy's Fish Shop
+Sandy                   - Sandy's Oasis Shop
+ShadowShop              - Krobus's Shadow Shop
+Hospital_Harvey         - Harvey's Clinic (Mon / Wed / Fri / Sun)
+Hospital_Maru           - Maru's Clinic (Tue / Thu)
+Dwarf                   - Dwarf's Shop
+IceCreamStand           - Ice Cream Stand
+
+
+Desert Festival Villager Shops
+-------------------------------
+DesertFestival_Abigail      - Abigail
+DesertFestival_Alex         - Alex
+DesertFestival_Caroline     - Caroline
+DesertFestival_Clint        - Clint
+DesertFestival_Demetrius    - Demetrius
+DesertFestival_Elliott      - Elliott
+DesertFestival_Emily        - Emily
+DesertFestival_Evelyn       - Evelyn
+DesertFestival_George       - George
+DesertFestival_Gus          - Gus
+DesertFestival_Haley        - Haley
+DesertFestival_Harvey       - Harvey
+DesertFestival_Jas          - Jas
+DesertFestival_Jodi         - Jodi
+DesertFestival_Kent         - Kent
+DesertFestival_Leah         - Leah
+DesertFestival_Leo          - Leo
+DesertFestival_Marnie       - Marnie
+DesertFestival_Maru         - Maru
+DesertFestival_Pam          - Pam
+DesertFestival_Penny        - Penny
+DesertFestival_Pierre       - Pierre
+DesertFestival_Robin        - Robin
+DesertFestival_Sam          - Sam
+DesertFestival_Sebastian    - Sebastian
+DesertFestival_Shane        - Shane
+DesertFestival_Vincent      - Vincent
+
+
+Misc & Faceless Shops
+----------------------
+These shops do not have vanilla portraits but SPO will display a portrait if
+your pack provides one.
+
+HatMouse                - Hat Mouse
+Casino                  - Casino
+VolcanoShop             - Volcano Dwarf Shop
+DesertTrade             - Desert Trader
+Traveler                - Traveling Cart
+QiGemShop               - Qi Gem Shop
+IslandTrade             - Island Trader
+BoxOffice               - Movie Theater Box Office
+Raccoon                 - Raccoon Shop
+Joja                    - JojaMart
+Bookseller              - Bookseller
+BooksellerTrade         - Bookseller Trade
+DesertFestival_EggShop  - Desert Festival Egg Shop
+
+
+Festival Shops
+--------------
+Festival_EggFestival_Pierre                     - Egg Festival (Pierre)
+Festival_FlowerDance_Pierre                     - Flower Dance (Pierre)
+Festival_Luau_Pierre                            - Luau (Pierre)
+Festival_DanceOfTheMoonlightJellies_Pierre      - Dance of the Moonlight Jellies (Pierre)
+Festival_StardewValleyFair_StarTokens           - Stardew Valley Fair (Star Token Shop)
+Festival_SpiritsEve_Pierre                      - Spirit's Eve (Pierre)
+Festival_FestivalOfIce_TravelingMerchant        - Festival of Ice (Traveling Merchant)
+Festival_FeastOfTheWinterStar_Pierre            - Feast of the Winter Star (Pierre)
+
+
+Night Market
+------------
+Festival_NightMarket_DecorationBoat     - Night Market (Decoration Boat)
+Festival_NightMarket_MagicBoat_Day1     - Night Market (Magic Boat Day 1)
+Festival_NightMarket_MagicBoat_Day2     - Night Market (Magic Boat Day 2)
+Festival_NightMarket_MagicBoat_Day3     - Night Market (Magic Boat Day 3)
+
+
+Total supported shops: 69. Nice.
+
+
+KNOWN LIMITATIONS
+-----------------
+- The Stardew Valley Fair Star Token shop and the Festival of Ice Traveling
+  Merchant shop use custom menu classes. Portraits will display correctly on
+  these shops but the shop window may not shift to make room, resulting in
+  slight overlap. This is a known limitation with no current fix.
+- Festival shops in general should be tested before releasing your pack as
+  some may behave differently than standard shops.

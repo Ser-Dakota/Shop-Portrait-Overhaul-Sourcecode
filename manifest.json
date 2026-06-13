@@ -1,0 +1,20 @@
+{
+  "Name": "Shop Portrait Overhaul",
+  "Author": "SerDakota",
+  "Version": "1.0.0",
+  "Description": "Replaces shop menu portraits with large full-body portraits.",
+  "UniqueID": "Dakota.ShopPortraitOverhaul",
+  "EntryDll": "ShopPortraitOverhaul.dll",
+  "MinimumApiVersion": "4.0.0",
+  "UpdateKeys": [],
+  "Dependencies": [
+    {
+      "UniqueID": "Pathoschild.ContentPatcher",
+      "IsRequired": true
+    },
+    {
+      "UniqueID": "spacechase0.GenericModConfigMenu",
+      "IsRequired": false
+    }
+  ]
+}
